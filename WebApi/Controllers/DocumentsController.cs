@@ -7,83 +7,59 @@ namespace WebApi.Controllers
     [Route("[controller]")]
     public class DocumentsController : ControllerBase
     {
-        private readonly ILogger<DocumentsController> _logger;
-        private readonly Service.IService _service;
+        private readonly Database.IDatabase _database;
 
-        public DocumentsController(ILogger<DocumentsController> logger, Service.IService service)
+        public DocumentsController(Database.IDatabase database)
         {
-            _logger = logger;
-            _service = service;
-
-            _service.Init();
+            _database = database;
         }
 
         [HttpGet]
-        [Route("{name}")]
-        public Document Get(string name)
+        [Route("{id}")]
+        [Produces("application/json", "application/xml"/*, "application/x-msgpack", "application/msgpack"*/)]
+        public Document Get(string id)
         {
-            var svcDoc = new Service.Models.Document()
-            {
-                Id = 0,
-                Name = name
-            };
-
-            var res = _service.GetDocument(svcDoc) ?? new Service.Models.Document()
-            {
-                Tags = new List<Service.Models.Tag>(),
-                Datas = new List<Service.Models.Data>(),
-            };
+            var dbDoc = _database.GetDocument(id);
+            if (dbDoc == null) { return new Document(); }
 
             return new Document()
             {
-                Id = res.Id,
-                Name = res.Name,
-                Tags = res.Tags.Select(y => new Tag() { Id = y.Id, Name = y.Name }).ToList(),
-                Datas = res.Datas.Select(y => new Data() { Id = y.Id, Name = y.Name, Type = y.Type, Content = y.Content }).ToList(),
+                Id = dbDoc.Id,
+                Data = dbDoc.Data,
+                Tags = dbDoc.Tags
             };
         }
 
         [HttpPost]
         public void Post(Document doc)
         {
-            var svcDoc = new Service.Models.Document()
+            var dbDoc = new Database.Models.Document()
             {
-                /*Id = doc.Id,*/
-                Name = doc.Name,
-                Tags = doc.Tags.Select(y => new Service.Models.Tag() { /*Id = y.Id,*/ Name = y.Name }).ToList(),
-                Datas = doc.Datas.Select(y => new Service.Models.Data() { /*Id = y.Id,*/ Name = y.Name, Type = y.Type, Content = y.Content }).ToList(),
+                Id = doc.Id,
+                Data = doc.Data,
+                Tags = doc.Tags
             };
 
-            _service.AddDocument(svcDoc);
-
+            _database.AddDocument(dbDoc);
         }
 
         [HttpPut]
         public void Put(Document doc)
         {
-            var svcDoc = new Service.Models.Document()
+            var dbDoc = new Database.Models.Document()
             {
                 Id = doc.Id,
-                Name = doc.Name,
-                Tags = doc.Tags.Select(y => new Service.Models.Tag() { Id = y.Id, Name = y.Name }).ToList(),
-                Datas = doc.Datas.Select(y => new Service.Models.Data() { Id = y.Id, Name = y.Name, Type = y.Type, Content = y.Content }).ToList(),
+                Data = doc.Data,
+                Tags = doc.Tags
             };
 
-            _service.UpdateDocument(svcDoc);
+            _database.UpdateDocument(dbDoc);
         }
 
         [HttpDelete]
-        public void Delete(Document doc)
+        public void Delete(string id)
         {
-            var svcDoc = new Service.Models.Document()
-            {
-                Id = doc.Id,
-                Name = doc.Name,
-                Tags = doc.Tags.Select(y => new Service.Models.Tag() { Id = y.Id, Name = y.Name }).ToList(),
-                Datas = doc.Datas.Select(y => new Service.Models.Data() { Id = y.Id, Name = y.Name, Type = y.Type, Content = y.Content }).ToList(),
-            };
-
-            _service.RemoveDocument(svcDoc);
+            _database.RemoveDocument(id);
         }
 
     }

@@ -3,49 +3,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database
 {
-    /**
-     * Implementaion of IDatabase needed for unit tests for mocking
-     */
-    public class MyDatabase : DbContext, IDatabase
+    public class MyDatabase : IDatabase
     {
-        /**
-         * Field are in plural because it has not to be ambiguous `Document in Documents`
-         * Table Datas make no sense but we keep pattern rules rather than english grammar
-         */
-        public DbSet<Document> Documents { get; set; }
-        public DbSet<Data> Datas { get; set; }
-        public DbSet<Tag> Tags { get; set; }
+        public IList<Document> Documents { get; set; }
 
-        private readonly string _connectionString;
-
-        public MyDatabase(string connectionString)
+        public MyDatabase()
         {
-            _connectionString = connectionString;
+            Documents = new List<Document>();
         }
 
-        /**
-         * I choose SQL server because of other implementations like InMemory or other databases are not common
-         * Using InMemory database is not recomended and MDF database need SQL Server either so no difference
-         * Attaching MDF file to SQL Server can cause multiple issues which can be difficult to fix for user
-         */
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public void Dispose()
         {
-            optionsBuilder.UseSqlServer(_connectionString);
         }
 
-        public bool EnsureCreated()
+        public void AddDocument(Document document)
         {
-            return this.Database.EnsureCreated();
+            if (!Documents.Any(x => x.Id == document.Id))
+            {
+                Documents.Add(document);
+            }
         }
 
-        public void Init()
+        public Document? GetDocument(string Id)
         {
-            EnsureCreated();
+            return Documents.FirstOrDefault(x => x.Id == Id);
         }
 
-        public void Clear()
+        public void RemoveDocument(string id)
         {
-            ChangeTracker.Clear();
+            var doc = GetDocument(id);
+            if (doc != null) {
+                Documents.Remove(doc);
+            }
+        }
+
+        public void UpdateDocument(Document document)
+        {
+            RemoveDocument(document.Id);
+            AddDocument(document);
         }
     }
 }

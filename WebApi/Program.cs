@@ -1,16 +1,16 @@
+using Microsoft.AspNetCore.Mvc.Formatters;
+using System.Text.Json;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddXmlDataContractSerializerFormatters();
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSingleton<Database.IDatabase, Database.MyDatabase>();
 builder.Services.AddSwaggerGen();
-
-
-builder.Services.AddSingleton<Database.IDatabase>(provider => new Database.MyDatabase("server=localhost;database=MyDatabase;integrated security=True;Connect Timeout=30"));
-builder.Services.AddSingleton<Repository.IRepository, Repository.MyRepository>();
-builder.Services.AddSingleton<Service.IService, Service.MyService>();
 
 var app = builder.Build();
 
