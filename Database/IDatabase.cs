@@ -9,12 +9,9 @@ namespace Database
      */
     public interface IDatabase : IDisposable
     {
-        public DbSet<Document> Documents { get; set; }
-        public DbSet<Data> Datas { get; set; }
-        public DbSet<Tag> Tags { get; set; }
-        public int SaveChanges();
-        public bool EnsureCreated();
-        public void Init();
-        public void Clear();
+        public void AddDocument(Document document);
+        public Document? GetDocument(string id);
+        public void RemoveDocument(string id);
+        public void UpdateDocument(Document document);
     }
 }

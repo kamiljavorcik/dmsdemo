@@ -4,13 +4,12 @@
     {
         public Document()
         {
-            Tags = new List<Tag>();
-            Datas = new List<Data>();
+            Tags = new List<string>();
+            Data = new Dictionary<string, string>();
         }
 
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public IList<Tag> Tags { get; set; }
-        public IList<Data> Datas { get; set; }
+        public string Id { get; set; }
+        public IList<string> Tags { get; set; }
+        public IDictionary<string,string> Data { get; set; }
     }
 }
